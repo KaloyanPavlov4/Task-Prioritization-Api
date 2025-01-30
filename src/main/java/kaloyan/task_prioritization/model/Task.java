@@ -1,14 +1,9 @@
 package kaloyan.task_prioritization.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
+import jakarta.persistence.*;
 import kaloyan.task_prioritization.utils.Priority;
 import lombok.Data;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
 
@@ -34,5 +29,9 @@ public class Task {
     private LocalDate dueDate;
 
     @Column(name = "is_completed", nullable = false)
+    @ColumnDefault("false")
     private boolean isCompleted;
+
+    @Transient
+    private boolean isCritical;
 }
