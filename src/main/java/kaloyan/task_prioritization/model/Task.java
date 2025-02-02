@@ -2,6 +2,7 @@ package kaloyan.task_prioritization.model;
 
 import jakarta.persistence.*;
 import kaloyan.task_prioritization.utils.Priority;
+import lombok.Builder;
 import lombok.Data;
 import org.hibernate.annotations.ColumnDefault;
 
@@ -9,13 +10,14 @@ import java.time.LocalDate;
 
 @Entity
 @Data
+@Builder
 public class Task {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(length = 100, nullable = false)
     private String title;
 
     @Column(length = 1000, nullable = false)
@@ -25,7 +27,7 @@ public class Task {
     @Enumerated(EnumType.STRING)
     private Priority priority;
 
-    @Column(name = "due_date", nullable = false)
+    @Column(name = "due_date")
     private LocalDate dueDate;
 
     @Column(name = "is_completed", nullable = false)

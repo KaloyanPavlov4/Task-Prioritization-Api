@@ -60,15 +60,17 @@ public class TaskServiceImpl implements TaskService {
             return;
         }
 
-        LocalDate today = LocalDate.now();
-        long daysUntilDue = ChronoUnit.DAYS.between(today, task.getDueDate());
+        if(task.getDueDate() != null){
+            LocalDate today = LocalDate.now();
+            long daysUntilDue = ChronoUnit.DAYS.between(today, task.getDueDate());
 
-        if (daysUntilDue <= 1) {
-            task.setPriority(Priority.HIGH);
-        } else if (daysUntilDue <= 3) {
-            task.setPriority(Priority.MEDIUM);
-        } else {
-            task.setPriority(Priority.LOW);
+            if (daysUntilDue <= 1) {
+                task.setPriority(Priority.HIGH);
+            } else if (daysUntilDue <= 3) {
+                task.setPriority(Priority.MEDIUM);
+            } else {
+                task.setPriority(Priority.LOW);
+            }
         }
     }
 }
