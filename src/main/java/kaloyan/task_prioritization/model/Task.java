@@ -1,9 +1,20 @@
 package kaloyan.task_prioritization.model;
 
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Transient;
 import kaloyan.task_prioritization.utils.Priority;
-import lombok.Builder;
 import lombok.Data;
+import lombok.Builder;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
@@ -11,6 +22,8 @@ import java.time.LocalDate;
 @Entity
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Task {
 
     @Id
@@ -24,16 +37,25 @@ public class Task {
     private String description;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     private Priority priority;
 
-    @Column(name = "due_date")
+    @Column
     private LocalDate dueDate;
 
-    @Column(name = "is_completed", nullable = false)
+    @Column(nullable = false)
     @ColumnDefault("false")
     private boolean isCompleted;
 
+    @Column
+    private String sentiment;
+
     @Transient
+    @JsonIgnore
     private boolean isCritical;
+
+    @JsonGetter("isCompleted")
+    public boolean isCompleted() {
+        return isCompleted;
+    }
 }

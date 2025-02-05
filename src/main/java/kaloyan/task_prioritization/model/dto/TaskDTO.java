@@ -1,13 +1,19 @@
-package kaloyan.task_prioritization.model;
+package kaloyan.task_prioritization.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import kaloyan.task_prioritization.model.Task;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TaskDTO {
 
     private Long id;
@@ -21,8 +27,10 @@ public class TaskDTO {
     private String description;
 
     @FutureOrPresent(message = "Due date should not be in the past")
+    @JsonProperty("dueDate")
     private LocalDate dueDate;
 
+    @JsonProperty("isCompleted")
     private boolean isCompleted;
 
     private boolean isCritical;
