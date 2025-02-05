@@ -1,76 +1,84 @@
 package kaloyan.task_prioritization.service;
 
-import kaloyan.task_prioritization.model.Task;
-import kaloyan.task_prioritization.repository.TaskRepository;
-import kaloyan.task_prioritization.utils.Priority;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
+import kaloyan.task_prioritization.exception.TaskNotFoundException;
+import kaloyan.task_prioritization.model.Task;
+import kaloyan.task_prioritization.model.specification.TaskSpecification;
+import kaloyan.task_prioritization.repository.TaskRepository;
+import kaloyan.task_prioritization.utils.Priority;
+import kaloyan.task_prioritization.utils.SentimentAnalysis;
+import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
 public class TaskServiceImpl implements TaskService {
+    private final String TASK_NOT_FOUND_EXCEPTION_MESSAGE = "Task with id %d was not found";
 
     private TaskRepository taskRepository;
 
-    @Override
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    public Page<Task> getTasks(Boolean isCompleted, Priority priority, String sortBy, int page, int size) {
+        Sort sort = getSorting(sortBy);
+        Specification<Task> spec = null;
+        if (isCompleted != null) {
+            spec = TaskSpecification.filterTasksByCompletion(isCompleted);
+        } else if (priority != null) {
+            spec = TaskSpecification.filterTasksByPriority(priority);
+        }
+        PageRequest pageRequest = PageRequest.of(page, size, sort);
+        return this.taskRepository.findAll(spec, pageRequest);
     }
 
-    @Override
     public Task getTaskById(long id) {
-        return taskRepository.findById(id).orElseThrow();
+        return (Task)this.taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException(String.format("Task with id %d was not found", new Object[] { Long.valueOf(id) })));
     }
 
-    @Override
     public Task createTask(Task task) {
-        calculatePriority(task);
-        return taskRepository.save(task);
+        task.setPriority(calculatePriority(task));
+        task.setSentiment(SentimentAnalysis.getSentiment(task.getTitle() + " " + task.getTitle()));
+        return (Task)this.taskRepository.save(task);
     }
 
-    @Override
     public Task updateTask(long id, Task task) {
-        Task taskToUpdate = taskRepository.findById(id).orElseThrow();
+        Task taskToUpdate = (Task)this.taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException(String.format("Task with id %d was not found", new Object[] { Long.valueOf(id) })));
         taskToUpdate.setTitle(task.getTitle());
         taskToUpdate.setDescription(task.getDescription());
         taskToUpdate.setDueDate(task.getDueDate());
         taskToUpdate.setCompleted(task.isCompleted());
         taskToUpdate.setCritical(task.isCritical());
-        calculatePriority(task);
-        return taskRepository.save(taskToUpdate);
+        taskToUpdate.setPriority(calculatePriority(task));
+        taskToUpdate.setSentiment(SentimentAnalysis.getSentiment(task.getTitle() + " " + task.getTitle()));
+        return (Task)this.taskRepository.save(taskToUpdate);
     }
 
-    @Override
     public void deleteTask(long id) {
-        taskRepository.deleteById(id);
+        this.taskRepository.deleteById(id);
     }
 
-    private void calculatePriority(Task task) {
-        if (task.isCompleted()) {
-            task.setPriority(Priority.LOW);
-            return;
-        }
+    private Sort getSorting(String sortBy) {
+        if (sortBy.equalsIgnoreCase("dueDate"))
+            return Sort.by(new Sort.Order[] { Sort.Order.asc("dueDate") });
+        return Sort.by(new Sort.Order[] { Sort.Order.asc("priority") });
+    }
 
-        if (task.isCritical()) {
-            task.setPriority(Priority.HIGH);
-            return;
-        }
-
-        if(task.getDueDate() != null){
+    private Priority calculatePriority(Task task) {
+        if (task.isCompleted())
+            return Priority.LOW;
+        if (task.isCritical())
+            return Priority.HIGH;
+        if (task.getDueDate() != null) {
             LocalDate today = LocalDate.now();
             long daysUntilDue = ChronoUnit.DAYS.between(today, task.getDueDate());
-
-            if (daysUntilDue <= 1) {
-                task.setPriority(Priority.HIGH);
-            } else if (daysUntilDue <= 3) {
-                task.setPriority(Priority.MEDIUM);
-            } else {
-                task.setPriority(Priority.LOW);
-            }
+            if (daysUntilDue <= 1L)
+                return Priority.HIGH;
+            if (daysUntilDue <= 3L)
+                return Priority.MEDIUM;
         }
+        return Priority.LOW;
     }
 }

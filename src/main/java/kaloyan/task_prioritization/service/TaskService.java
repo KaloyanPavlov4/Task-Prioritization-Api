@@ -1,18 +1,17 @@
 package kaloyan.task_prioritization.service;
 
 import kaloyan.task_prioritization.model.Task;
-
-import java.util.List;
+import kaloyan.task_prioritization.utils.Priority;
+import org.springframework.data.domain.Page;
 
 public interface TaskService {
+    Page<Task> getTasks(Boolean paramBoolean, Priority paramPriority, String paramString, int paramInt1, int paramInt2);
 
-    List<Task> getAllTasks();
+    Task getTaskById(long paramLong);
 
-    Task getTaskById(long id);
+    Task createTask(Task paramTask);
 
-    Task createTask(Task task);
+    Task updateTask(long paramLong, Task paramTask);
 
-    Task updateTask(long id, Task task);
-
-    void deleteTask(long id);
+    void deleteTask(long paramLong);
 }

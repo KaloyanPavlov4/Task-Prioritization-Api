@@ -4,18 +4,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 import kaloyan.task_prioritization.model.Task;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class TaskDTO {
-
     private Long id;
 
     @NotBlank(message = "The title is required")
@@ -37,11 +35,11 @@ public class TaskDTO {
 
     public Task toTask() {
         return Task.builder()
-                .title(title)
-                .description(description)
-                .dueDate(dueDate)
-                .isCompleted(isCompleted)
-                .isCritical(isCritical)
+                .title(this.title)
+                .description(this.description)
+                .dueDate(this.dueDate)
+                .isCompleted(this.isCompleted)
+                .isCritical(this.isCritical)
                 .build();
     }
 }
