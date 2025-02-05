@@ -1,0 +1,3 @@
+INSERT INTO task (id, description, due_date, is_completed, priority, sentiment, title) VALUES(100, 'Task1', '2025-02-02', FALSE, 0, 'Negative', 'Task1');
+INSERT INTO task (id, description, due_date, is_completed, priority, sentiment, title) VALUES(200, 'Task2', '2024-02-02', TRUE, 1, 'Negative', 'Task2');
+INSERT INTO task (id, description, due_date, is_completed, priority, sentiment, title) VALUES(300, 'Task3', '2023-02-02', FALSE, 2, 'Negative', 'Task3');

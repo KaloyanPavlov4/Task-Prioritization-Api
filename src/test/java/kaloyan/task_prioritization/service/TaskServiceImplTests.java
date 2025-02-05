@@ -52,17 +52,44 @@ class TaskServiceImplTests {
     @Test
     public void getTaskById_WhenTaskExists_ShouldReturnTask() {
         Task task = taskService.getTaskById(100);
-        assertEquals("Fix Bug", task.getTitle());
+        assertEquals("Task1", task.getTitle());
     }
 
     @Test
     public void getAllTasks_ShouldReturnCorrectAmount() {
-        assertEquals(3, taskService.getTasks(null, null, "priority").size());
+        assertEquals(3, taskService.getTasks(null, null, "priority", 0, 50).getTotalElements());
     }
 
     @Test
     public void getTaskById_WhenTaskDoesNotExist_ShouldThrowException() {
         assertThrows(TaskNotFoundException.class, () -> taskService.getTaskById(1000L));
+    }
+
+    @Test
+    public void getTasksFilterByPriority_ShouldReturnCorrectTasks() {
+        Task task = taskService.getTasks(null, Priority.MEDIUM, "priority", 0, 5).getContent().get(0);
+        assertEquals(Priority.MEDIUM, task.getPriority());
+        assertEquals("Task2", task.getTitle());
+    }
+
+    @Test
+    public void getTasksFilterByCompletion_ShouldReturnCorrectTasks() {
+        Task task = taskService.getTasks(true, null, "priority", 0, 5).getContent().get(0);
+        assertTrue(task.isCompleted());
+        assertEquals("Task2", task.getTitle());
+    }
+
+    @Test
+    public void getTasksSortByPriority_ShouldReturnHighPriorityTasksFirst() {
+        Task task = taskService.getTasks(null, null, "priority", 0, 5).getContent().get(0);
+        assertEquals(Priority.HIGH, task.getPriority());
+        assertEquals("Task1", task.getTitle());
+    }
+
+    @Test
+    public void getTasksSortByDueDate_ShouldReturnEarliestFirst() {
+        Task task = taskService.getTasks(null, null, "dueDate", 0, 5).getContent().get(0);
+        assertEquals("Task3", task.getTitle());
     }
 
     @Test
@@ -82,7 +109,7 @@ class TaskServiceImplTests {
     @Test
     public void deleteTask_ShouldDelete() {
         taskService.deleteTask(100L);
-        assertEquals(2, taskService.getTasks(null, null, "priority").size());
+        assertEquals(2, taskService.getTasks(null, null, "priority", 0, 50).getTotalElements());
     }
 
 }
